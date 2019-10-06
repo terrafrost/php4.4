@@ -9,15 +9,6 @@ RUN printf "deb http://archive.debian.org/debian/ wheezy main non-free contrib\n
 RUN apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y wget build-essential vim git
 
 RUN cd /tmp \
-    && wget --no-check-certificate http://www.openssl.org/source/openssl-0.9.8x.tar.gz \
-    && tar xvfz openssl-0.9.8x.tar.gz \
-    && cd openssl-0.9.8x \
-    && ./config --prefix=/usr/local/openssl-0.9.8 \
-    && make \
-    && make install
-
-RUN mkdir /usr/local/src/php4-build \
-    && cd /usr/local/src/php4-build \
     && wget --no-check-certificate https://museum.php.net/php4/php-4.4.9.tar.bz2 \
     && tar jxf php-4.4.9.tar.bz2
 
@@ -31,7 +22,7 @@ RUN ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/ \
 
 RUN apt-get build-dep -y php5
 
-RUN cd /usr/local/src/php4-build/php-4.4.9/ \
+RUN cd /tmp/php-4.4.9/ \
     && sed -i 's/__GMP_BITS_PER_MP_LIMB/GMP_LIMB_BITS/g' ext/gmp/gmp.c \
     && ./configure \
        --with-pdo-pgsql \
@@ -64,8 +55,6 @@ RUN cd /usr/local/src/php4-build/php-4.4.9/ \
        --with-jpeg-dir=/usr \
        --with-png-dir=/usr \
        --enable-gd-native-ttf \
-       --with-openssl=/usr/local/openssl-0.9.8 \
-       --with-openssl-dir=/usr/local/openssl-0.9.8 \
        --with-libdir=/lib/x86_64-linux-gnu \
        --enable-ftp \
        --with-imap \
@@ -75,5 +64,7 @@ RUN cd /usr/local/src/php4-build/php-4.4.9/ \
        --with-expat-dir=/usr \
      && make \
      && make install-cli
+
+WORKDIR /root
 
 CMD ["bash"]
